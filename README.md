@@ -69,7 +69,7 @@ Current simulations:
 
 ## Visual Diagrams
 
-Visual demonstrations of Judgment Engineering concepts will be added as the research develops.
+The repository includes five publication-quality figures illustrating the complete Judgment Engineering framework, from foundational concepts through organizational applications.
 
 ## Roadmap
 
@@ -114,3 +114,7 @@ The project combines engineering practice, knowledge management, and artificial 
 For research discussions and collaboration:
 
 Chijioke Edinburgh Jemanze
+
+https://www.linkedin.com/in/chijioke-edinburgh-jemanze
+GitHub: https://github.com/<your-username>
+Email: Edinburghray@gmail.com
