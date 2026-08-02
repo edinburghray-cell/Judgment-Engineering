@@ -1,7 +1,13 @@
 # Judgment Engineering
 
+![Research](https://img.shields.io/badge/Status-Active%20Research-blue)
+![Prototype](https://img.shields.io/badge/Prototype-v0.1-green)
+![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-lightgrey)
+![AI](https://img.shields.io/badge/AI-Human--Centered-purple)
+
 **Preserving Human Judgment as Organizational Memory for AI-Assisted Decision Making**
 
+*A research initiative exploring how organizations can capture, preserve, reconstruct, evaluate, and improve human judgment using structured methods and responsible AI.*
 ---
 
 ## Introduction
