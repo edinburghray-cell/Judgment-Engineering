@@ -71,7 +71,8 @@ Current simulations:
 
 The project includes publication-quality visual figures illustrating the conceptual architecture of Judgment Engineering.
 
-- Figure 1 – Foundations of Judgment Engineering
+-figure-1-foundations-of-judgment-engineering.png
+
 - Figure 2 – Core Mechanisms of Judgment Engineering
 - Figure 3 – Methods and Measurement of Judgment Engineering
 - Figure 4 – Applications of Judgment Engineering
