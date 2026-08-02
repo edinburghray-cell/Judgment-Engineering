@@ -69,7 +69,33 @@ Current simulations:
 
 ## Visual Diagrams
 
-The repository includes five publication-quality figures illustrating the complete Judgment Engineering framework, from foundational concepts through organizational applications.
+The project includes publication-quality visual figures illustrating the conceptual architecture of Judgment Engineering.
+
+- Figure 1 – Foundations of Judgment Engineering
+- Figure 2 – Core Mechanisms of Judgment Engineering
+- Figure 3 – Methods and Measurement of Judgment Engineering
+- Figure 4 – Applications of Judgment Engineering
+- Figure 5 – Complete Discipline Architecture
+
+### Figure 1 – Foundations of Judgment Engineering
+
+![Figure 1](figures/figure-1-foundations.png)
+
+### Figure 2 – Core Mechanisms of Judgment Engineering
+
+![Figure 2](figures/figure-2-core-mechanisms.png)
+
+### Figure 3 – Methods and Measurement of Judgment Engineering
+
+![Figure 3](figures/figure-3-methods-and-measurement.png)
+
+### Figure 4 – Applications of Judgment Engineering
+
+![Figure 4](figures/figure-4-applications.png)
+
+### Figure 5 – Complete Discipline Architecture
+
+![Figure 5](figures/figure-5-complete-discipline-architecture.png)
 
 ## Roadmap
 
