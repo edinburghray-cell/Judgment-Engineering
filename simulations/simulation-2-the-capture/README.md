@@ -1,11 +1,11 @@
 # Simulation 2 — The Capture
 
-This simulation demonstrates how human judgment can be captured and transformed into a structured Judgment Record, preserving the reasoning behind important decisions rather than only their outcomes.
+This simulation demonstrates how individual expertise can be transformed into structured organizational memory through Judgment Engineering.
 
-## Visual 2A — Judgment Capture
+## Visual 2A — From Human Expertise to Organizational Memory
 
-![Simulation 2A](Simulation_2A_Judgment_Capture.webp)
+![Simulation 2A](Simulation_2A_Human_Expertise_to_Organizational_Memory.webp)
 
-## Visual 2B — Structured Judgment Record
+## Visual 2B — Judgment Record Anatomy
 
-![Simulation 2B](Simulation_2B_Structured_Judgment_Record.webp)
+![Simulation 2B](Simulation_2B_Judgment_Record_Anatomy.webp)
