@@ -2,7 +2,7 @@
 
 This simulation demonstrates how preserved judgment can be transferred from one person to another, or from humans to AI-assisted systems. Rather than inheriting only historical records, future decision makers inherit the reasoning that guided earlier decisions.
 
-## Visual 3A — Human Decision to AI-Structured Judgment
+## Visual 3A — Human Decision to AI-Structured Memory
 
 ![Simulation 3A](Simulation_3A_Human_Decision_to_AI_Structured_Memory.webp)
 
