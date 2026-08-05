@@ -4,7 +4,7 @@ This simulation demonstrates how preserved judgment can be transferred from one 
 
 ## Visual 3A — Human Decision to AI-Structured Judgment
 
-![Simulation 3A](Simulation_3A_Human_Decision_to_AI_Structured_Judgment.webp)
+![Simulation 3A](Simulation_3A_Human_Decision_to_AI_Structured_Memory.webp)
 
 This visual illustrates how human expertise is transformed into a structured judgment record that AI systems can organize, retrieve, and support without replacing human judgment.
 
