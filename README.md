@@ -61,7 +61,33 @@ Detailed framework:
 
 # Research Simulations
 
-The project currently includes four research simulations demonstrating how preserved judgment improves organizational continuity.
+## Research Simulations
+
+The following visual simulations demonstrate the core concepts of Judgment Engineering through a progressive research narrative.
+
+### Simulation 1 — The Loss
+
+How organizations preserve events but lose the reasoning behind critical decisions.
+
+➡️ [Open Simulation 1](simulations/simulation-1-the-loss/)
+
+### Simulation 2 — The Capture
+
+How human judgment can be captured as structured organizational memory.
+
+➡️ [Open Simulation 2](simulations/simulation-2-the-capture/)
+
+### Simulation 3 — The Transfer
+
+How preserved judgment can be transferred to future decision makers and AI-assisted systems.
+
+➡️ [Open Simulation 3](simulations/simulation-3-the-transfer/)
+
+### Simulation 4 — The Institution
+
+How Judgment Engineering becomes an organizational capability through continuous learning.
+
+➡️ [Open Simulation 4](simulations/simulation-4-the-institution/)
 
 ### Current Simulations
 
