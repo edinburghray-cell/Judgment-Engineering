@@ -1,36 +1,251 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Judgment Engineering
 
-## Getting Started
+![Research](https://img.shields.io/badge/Status-Active%20Research-blue)
+![Prototype](https://img.shields.io/badge/Prototype-v0.1-green)
+![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-lightgrey)
+![AI](https://img.shields.io/badge/AI-Human--Centered-purple)
 
-First, run the development server:
+**Preserving Human Judgment as Organizational Memory for AI-Assisted Decision Making**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+*A research initiative exploring how organizations can capture, preserve, reconstruct, evaluate, and improve human judgment using structured methods and responsible AI.*
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Introduction
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Organizations preserve decisions through documents, reports, emails, and databases. Yet the reasoning behind those decisions often disappears. As experienced professionals leave, organizations inherit outcomes but lose the judgment that produced them.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Judgment Engineering** is an independent research initiative exploring how organizations can systematically capture, preserve, reconstruct, evaluate, and improve human judgment using structured methods and responsible AI.
 
-## Learn More
+Rather than preserving only **what** was decided, Judgment Engineering investigates how organizations can preserve **why** decisions were made, transforming human reasoning into a reusable organizational asset.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Research Question
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+> **How can organizations capture, preserve, and continuously improve the reasoning behind important decisions instead of preserving only their outcomes?**
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Vision
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+To establish Judgment Engineering as a scientific and engineering discipline that enables organizations to preserve human judgment as searchable, reusable, and continuously improving organizational memory.
+
+---
+
+## Core Principles
+
+Judgment Engineering is built upon four foundational principles:
+
+- Preserve reasoning, not only decisions.
+- Treat organizational judgment as a reusable asset.
+- Use AI to structure and retrieve human reasoning without replacing human judgment.
+- Improve future decisions through preserved organizational learning.
+
+---
+
+# Research Framework
+
+The framework explores five interconnected areas:
+
+- Judgment Capture
+- Reasoning Preservation
+- Organizational Memory
+- AI-Assisted Retrieval
+- Continuous Organizational Learning
+
+Detailed framework:
+
+**Framework/Research_Framework.md**
+
+---
+
+# Research Simulations
+
+## Research Simulations
+
+The following visual simulations demonstrate the core concepts of Judgment Engineering through a progressive research narrative.
+
+### Simulation 1 — The Loss
+
+How organizations preserve events but lose the reasoning behind critical decisions.
+
+➡️ [Open Simulation 1](simulations/simulation-1-the-loss/)
+
+### Simulation 2 — The Capture
+
+How human judgment can be captured as structured organizational memory.
+
+➡️ [Open Simulation 2](simulations/simulation-2-the-capture/)
+
+### Simulation 3 — The Transfer
+
+How preserved judgment can be transferred to future decision makers and AI-assisted systems.
+
+➡️ [Open Simulation 3](simulations/simulation-3-the-transfer/)
+
+### Simulation 4 — The Institution
+
+How Judgment Engineering becomes an organizational capability through continuous learning.
+
+➡️ [Open Simulation 4](simulations/simulation-4-the-institution/)
+
+### Current Simulations
+
+- Network Operations Center Failure Response
+- Engineering Decision Transfer
+- Organizational Knowledge Loss
+- AI-Assisted Decision Recovery
+
+These simulations illustrate practical applications of Judgment Engineering across real operational environments.
+
+---
+
+# Visual Architecture
+
+The repository includes publication-quality visual figures explaining the conceptual architecture of Judgment Engineering.
+
+---
+
+## Figure 1 — Foundations of Judgment Engineering
+
+![Figure 1](figures/figure-1-foundations-of-judgment-engineering.png)
+
+---
+
+## Figure 2 — Core Mechanisms of Judgment Engineering
+
+![Figure 2](figures/figure-2-core-mechanisms-of-judgment-engineering.png)
+
+---
+
+## Figure 3 — Methods and Measurement of Judgment Engineering
+
+![Figure 3](figures/figure-3-methods-and-measurement-of-judgment-engineering.png)
+
+---
+
+## Figure 4 — Applications of Judgment Engineering
+
+![Figure 4](figures/figure-4-applications-of-judgment-engineering.png)
+
+---
+
+## Figure 5 — Complete Discipline Architecture
+
+![Figure 5](figures/figure-5-complete-discipline-architecture.png)
+
+---
+
+# Repository Roadmap
+
+## Completed
+
+- ✅ Research Question
+- ✅ Conceptual Framework
+- ✅ White Paper (Book Manuscript)
+- ✅ Four Research Simulations
+- ✅ Visual Architecture
+- ✅ System Architecture
+
+## In Progress
+
+- ⬜ Prototype Judgment Capture Platform
+- ⬜ Judgment Repository
+- ⬜ Open-source Reference Implementation
+
+## Planned
+
+- ⬜ Academic Paper Submission
+- ⬜ Public Demonstration Platform
+- ⬜ Organizational Pilot Studies
+
+---
+
+# Current Prototype
+
+The first prototype demonstrates the complete Judgment Engineering lifecycle through four stages.
+
+1. Capture organizational judgment.
+2. Retrieve preserved reasoning.
+3. Evaluate outcomes against assumptions.
+4. Continuously improve future judgment.
+
+The prototype is currently under active development.
+
+---
+
+# Research Contributions
+
+Judgment Engineering introduces several foundational concepts, including:
+
+- Judgment Units
+- Judgment Capture
+- Judgment Reconstruction
+- Judgment Evaluation
+- Judgment Improvement
+- Organizational Judgment Lifecycle
+- Judgment Preservation
+- Judgment Residue
+- Organizational Memory for AI
+
+---
+
+# Why This Research Matters
+
+Organizations already preserve enormous amounts of information.
+
+They rarely preserve the reasoning that produced it.
+
+Judgment Engineering aims to make organizational judgment:
+
+- Explainable
+- Searchable
+- Traceable
+- Transferable
+- Continuously improvable
+
+This supports stronger governance, organizational resilience, responsible AI, and improved institutional learning.
+
+---
+
+# Contributing
+
+Judgment Engineering is an open research initiative.
+
+Researchers, engineers, knowledge management practitioners, AI researchers, organizational leaders, and students interested in advancing the discipline are welcome to contribute ideas, discussion, and constructive feedback.
+
+---
+
+# About
+
+Judgment Engineering is an independent research initiative created by **Chijioke Edinburgh Jemanze**.
+
+The work combines engineering practice, organizational learning, knowledge management, decision science, and artificial intelligence to investigate new methods for preserving human judgment as organizational memory.
+
+---
+
+# Contact
+
+**Chijioke Edinburgh Jemanze**
+
+LinkedIn
+
+https://www.linkedin.com/in/chijioke-edinburgh-jemanze
+
+GitHub
+
+https://github.com/EdinburghRay-cell
+
+Email
+
+Edinburghray@gmail.com
+
+---
+
+## Citation
+
+If you reference this work in research or professional publications, please cite this repository appropriately.
+
+---
+
+© 2026 Chijioke Edinburgh Jemanze. All Rights Reserved.
