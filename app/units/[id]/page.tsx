@@ -1,6 +1,7 @@
-﻿import { supabase } from '@/lib/supabaseClient';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
+﻿import { supabase } from "@/lib/supabaseClient";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import RetrospectiveForm from "./RetrospectiveForm";
 
 export default async function UnitDetailPage({
   params,
@@ -9,9 +10,9 @@ export default async function UnitDetailPage({
 }) {
   const { id } = await params;
   const { data: unit, error } = await supabase
-    .from('judgment_units')
-    .select('*')
-    .eq('id', id)
+    .from("judgment_units")
+    .select("*")
+    .eq("id", id)
     .single();
 
   if (error || !unit) return notFound();
@@ -38,7 +39,7 @@ export default async function UnitDetailPage({
       </div>
       <h1 className="text-2xl font-bold mb-1">{unit.title}</h1>
       <p className="text-gray-500 text-sm mb-8">
-        {unit.department || 'N/A'} - {unit.decision_owner || 'N/A'} -{' '}
+        {unit.department || "N/A"} - {unit.decision_owner || "N/A"} -{" "}
         {unit.decision_date}
       </p>
 
@@ -46,7 +47,7 @@ export default async function UnitDetailPage({
         <section className="border rounded p-4">
           <h2 className="font-semibold mb-2">Context and Situation Trigger</h2>
           <p className="text-sm text-gray-700 whitespace-pre-wrap">
-            {unit.situation || 'Not recorded.'}
+            {unit.situation || "Not recorded."}
           </p>
           {unit.problem && (
             <>
@@ -62,10 +63,10 @@ export default async function UnitDetailPage({
           <h2 className="font-semibold mb-2">Chosen Rationale vs Rejected</h2>
           <div className="text-sm">
             <p className="font-medium text-green-700">
-              Chosen: {unit.chosen_option || 'N/A'}
+              Chosen: {unit.chosen_option || "N/A"}
             </p>
             <p className="text-gray-700 whitespace-pre-wrap mt-1">
-              {unit.rationale || 'No rationale recorded.'}
+              {unit.rationale || "No rationale recorded."}
             </p>
           </div>
           {rejected.length > 0 && (
@@ -73,14 +74,14 @@ export default async function UnitDetailPage({
               {rejected.map((r, i) => (
                 <p key={i} className="text-sm text-gray-500">
                   Rejected: {r.label}
-                  {r.reason_rejected ? ` - ${r.reason_rejected}` : ''}
+                  {r.reason_rejected ? ` - ${r.reason_rejected}` : ""}
                 </p>
               ))}
             </div>
           )}
           {options.length > 0 && (
             <p className="text-xs text-gray-400 mt-3">
-              All options considered: {options.map((o) => o.label).join(', ')}
+              All options considered: {options.map((o) => o.label).join(", ")}
             </p>
           )}
         </section>
@@ -91,11 +92,11 @@ export default async function UnitDetailPage({
           </h2>
           <h3 className="text-sm font-medium mb-1">Assumptions</h3>
           <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3">
-            {unit.assumptions || 'Not recorded.'}
+            {unit.assumptions || "Not recorded."}
           </p>
           <h3 className="text-sm font-medium mb-1">Accepted Risks</h3>
           <p className="text-sm text-gray-700 whitespace-pre-wrap">
-            {unit.accepted_risks || 'Not recorded.'}
+            {unit.accepted_risks || "Not recorded."}
           </p>
         </section>
 
@@ -112,21 +113,48 @@ export default async function UnitDetailPage({
           )}
           <h3 className="text-sm font-medium mb-1">Success Metrics</h3>
           <p className="text-sm text-gray-700 whitespace-pre-wrap">
-            {unit.success_metrics || 'Not recorded.'}
+            {unit.success_metrics || "Not recorded."}
           </p>
         </section>
       </div>
 
       <div className="mt-6 border-t pt-4">
         {unit.outcome_status ? (
-          <p className="text-sm text-gray-600">
-            Retrospective on file - outcome:{' '}
-            <span className="font-medium">{unit.outcome_status}</span>
-          </p>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600">
+              Retrospective on file - outcome:{" "}
+              <span className="font-medium">{unit.outcome_status}</span>
+            </p>
+            {unit.assumptions_confirmed && (
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">Confirmed:</span>{" "}
+                {unit.assumptions_confirmed}
+              </p>
+            )}
+            {unit.assumptions_invalidated && (
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">Invalidated:</span>{" "}
+                {unit.assumptions_invalidated}
+              </p>
+            )}
+            {unit.unexpected_risks && (
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">Unexpected risks:</span>{" "}
+                {unit.unexpected_risks}
+              </p>
+            )}
+            {unit.next_time_changes && (
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">Next time:</span>{" "}
+                {unit.next_time_changes}
+              </p>
+            )}
+            <p className="text-xs text-gray-400">
+              Retrospective date: {unit.retrospective_date}
+            </p>
+          </div>
         ) : (
-          <p className="text-sm text-gray-400">
-            No retrospective yet. (Stage 3 - coming next.)
-          </p>
+          <RetrospectiveForm id={unit.id} />
         )}
       </div>
     </main>
