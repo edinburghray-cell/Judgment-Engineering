@@ -72,6 +72,35 @@ Its focus begins with a different organizational question:
 
 This repository contains both the research framework behind Judgment Engineering and a working prototype used to test the framework in practice.
 
+### Judgment Engineering and Engineering Judgment
+
+Judgment Engineering should not be confused with **engineering judgment**, although the two concepts are closely related.
+
+**Engineering judgment** is an established concept concerned with how engineers apply knowledge, experience, metacognitive thinking, critical thinking, situational context, evaluation, and decision making when solving problems and making decisions. Recent research has sought to develop a consensus-based definition and methods for teaching and assessing engineering judgment. In a 2025 research brief, Clark, Dickerson, and Toader describe engineering judgment as the application of an engineer's knowledge, experience, metacognitive thinking, and situational context to perform critical thinking, including decision making and evaluation, in support of design or problem solving.
+
+**Judgment Engineering addresses a different problem.** It concerns what happens to consequential human reasoning across its organizational lifecycle: whether it can be captured and preserved, subsequently retrieved and reconstructed, evaluated against outcomes, and used to improve future judgment.
+
+In simple terms:
+
+> **Engineering judgment concerns the exercise of judgment. Judgment Engineering concerns the engineering of its organizational lifecycle.**
+
+The distinction can be expressed simply:
+
+| | Engineering Judgment | Judgment Engineering |
+|---|---|---|
+| **Primary concern** | How judgment is exercised | How judgment is preserved and managed across its lifecycle |
+| **Focus** | The practitioner and the problem | The organization and its decision memory |
+| **Central question** | How should judgment be applied to a problem or decision? | How can an organization preserve and improve the reasoning behind consequential decisions? |
+| **Primary outcome** | Better judgment and decision making | Durable, retrievable, evaluable organizational judgment |
+
+Judgment Engineering does not attempt to redefine engineering judgment. It builds on the broader understanding that judgment involves knowledge, experience, context, critical thinking, decision making, evaluation, assumptions, problem definition, anticipation, feedback, and learning.
+
+Its focus begins with a different organizational question:
+
+> **What happens to judgment after the decision has been made?**
+
+This repository contains both the research framework behind Judgment Engineering and a working prototype used to test the framework in practice.
+
 ---
 
 ## Core Principles
