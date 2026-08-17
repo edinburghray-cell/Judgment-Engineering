@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
@@ -71,6 +72,9 @@ export default function CapturePage() {
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
+      <Link href="/units" className="text-sm text-blue-700 hover:underline">
+        Back to Judgment Units
+      </Link>
       <h1 className="text-2xl font-bold mb-1">Capture a Decision</h1>
       <p className="text-gray-600 mb-8">
         Convert real-time rationale into a structured Judgment Unit.
@@ -132,7 +136,7 @@ export default function CapturePage() {
             3. The 7 Preservation Questions
           </legend>
           <textarea
-            placeholder="1. Problem — what problem is being solved?"
+            placeholder="1. Problem â€” what problem is being solved?"
             className="w-full border rounded p-2"
             rows={2}
             value={form.problem}
@@ -157,7 +161,7 @@ export default function CapturePage() {
             onChange={(e) => setRejectedRaw(e.target.value)}
           />
           <textarea
-            placeholder="3. Rationale — why this option?"
+            placeholder="3. Rationale â€” why this option?"
             className="w-full border rounded p-2"
             rows={3}
             value={form.rationale}
@@ -184,7 +188,7 @@ export default function CapturePage() {
             onChange={(e) => update('accepted_risks', e.target.value)}
           />
           <textarea
-            placeholder="7. Success metrics — how will we know this worked?"
+            placeholder="7. Success metrics â€” how will we know this worked?"
             className="w-full border rounded p-2"
             rows={2}
             value={form.success_metrics}
@@ -199,9 +203,14 @@ export default function CapturePage() {
           disabled={saving}
           className="bg-blue-900 text-white px-6 py-2 rounded font-semibold disabled:opacity-50"
         >
-          {saving ? 'Saving…' : 'Commit Judgment Unit'}
+          {saving ? 'Savingâ€¦' : 'Commit Judgment Unit'}
         </button>
       </form>
     </main>
   );
 }
+
+
+
+
+

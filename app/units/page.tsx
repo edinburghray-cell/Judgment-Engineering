@@ -30,7 +30,10 @@ export default async function UnitsPage({
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-10">
-      <div className="flex items-center justify-between mb-6">
+      <Link href="/" className="text-sm text-blue-700 hover:underline">
+  Back to Judgment Engineering
+</Link>
+<div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Judgment Units</h1>
           <p className="text-gray-600">
@@ -110,3 +113,4 @@ export default async function UnitsPage({
     </main>
   );
 }
+
