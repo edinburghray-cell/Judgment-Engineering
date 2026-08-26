@@ -17,6 +17,12 @@ export default async function UnitDetailPage({
 
   if (error || !unit) return notFound();
 
+const { data: transfers } = await supabase
+  .from("judgment_transfers")
+  .select("id, treatment, what_changed, created_at")
+  .eq("source_judgment_unit_id", id)
+  .order("created_at", { ascending: false });
+
   const options: { label: string }[] = unit.options ?? [];
   const rejected: { label: string; reason_rejected?: string }[] =
     unit.rejected_options ?? [];
@@ -157,6 +163,46 @@ export default async function UnitDetailPage({
           <RetrospectiveForm id={unit.id} />
         )}
       </div>
-    </main>
+    <div className="mt-8">
+  <section className="border rounded-lg p-5">
+    <h2 className="text-xl font-semibold mb-3">Judgment Transfer History</h2>
+
+    {transfers && transfers.length > 0 ? (
+      <div className="space-y-3">
+        {transfers.map((transfer: any) => (
+          <div key={transfer.id} className="border rounded-lg p-4">
+            <p className="font-semibold capitalize">
+              {transfer.treatment}
+            </p>
+
+            <p className="text-sm text-gray-700 mt-1">
+              {transfer.what_changed || "No change recorded."}
+            </p>
+
+            <p className="text-xs text-gray-400 mt-2">
+              {new Date(transfer.created_at).toLocaleString()}
+            </p>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p className="text-sm text-gray-500">
+        No judgment transfers recorded yet.
+      </p>
+    )}
+  </section>
+</div>
+<div className="mt-6">
+  <a
+    href={`/units/${unit.id}/transfer`}
+    className="inline-block rounded-lg bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
+  >
+    Transfer Judgment
+  </a>
+</div>
+</main>
   );
 }
+
+
+
