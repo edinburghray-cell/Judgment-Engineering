@@ -5,9 +5,9 @@
 ![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-lightgrey)
 ![AI](https://img.shields.io/badge/AI-Human--Centered-purple)
 
-**Preserving Human Judgment as Organizational Memory for AI-Assisted Decision Making**
+**Preserving Human Judgment as Organizational Memory for Future AI-Assisted Decision Making**
 
-*A research initiative exploring how organizations can capture, preserve, reconstruct, evaluate, and improve human judgment using structured methods and responsible AI.*
+*A research initiative exploring how organizations can capture, preserve, reconstruct, evaluate, and improve human judgment using structured methods, with AI-assisted capabilities as a future research direction..*
 
 ---
 
@@ -15,23 +15,22 @@
 
 Organizations preserve decisions through documents, reports, emails, and databases. Yet the reasoning behind those decisions often disappears. As experienced professionals leave, organizations inherit outcomes but lose the judgment that produced them.
 
-**Judgment Engineering** is an independent research initiative exploring how organizations can systematically capture, preserve, reconstruct, evaluate, and improve human judgment using structured methods and responsible AI.
+**Judgment Engineering** is an independent research initiative exploring how organizations can systematically capture, preserve, reconstruct, evaluate, and improve human judgment using structured methods, with AI-assisted capabilities forming part of the broader research direction.
 
-Rather than preserving only **what** was decided, Judgment Engineering investigates how organizations can preserve **why** decisions were made, transforming human reasoning into a reusable organizational asset.
+Rather than preserving only **what** was decided, Judgment Engineering investigates how organizations can preserve **why** decisions were made, with the aim of making that reasoning a reusable organizational asset.
 
-The research has now progressed from conceptual framework and simulations to a working software prototype that demonstrates this principle through structured **Judgment Units**.
+The research has progressed from conceptual frameworks and simulations to a working software prototype that demonstrates this principle through structured **Judgment Units**.
 
 ---
 
 ## Research Question
 
 > **How can organizations capture, preserve, and continuously improve the reasoning behind important decisions instead of preserving only their outcomes?**
-
 ---
 
 ## Vision
 
-To establish Judgment Engineering as a scientific and engineering discipline that enables organizations to preserve human judgment as searchable, reusable, and continuously improving organizational memory.
+This research aims to develop Judgment Engineering into a scientific and engineering discipline that enables organizations to preserve human judgment as searchable, reusable, and continuously improving organizational memory.
 
 ---
 
@@ -41,36 +40,8 @@ Judgment Engineering is an emerging discipline concerned with the deliberate des
 
 Its core object is the Judgment Unit: a structured record of the reasoning around a decision, including the problem being addressed, options considered, rationale, assumptions, evidence, accepted risks, and success metrics.
 
-The discipline addresses a problem between individual decision making and organizational memory: the reasoning behind consequential decisions is often lost even when the decisions themselves are documented. Judgment Engineering therefore investigates how organizations can preserve enough of the original judgment that a future person can reconstruct why a decision was made, understand what was known at the time, and later evaluate that judgment against what actually happened.
+The discipline addresses a problem between individual decision making and organizational memory: the reasoning behind consequential decisions is often lost even when the decisions themselves are documented. Judgment Engineering therefore investigates how organizations can preserve enough of the original judgment that a future person can reconstruct why a decision was made, understand what was known at the time, and later evaluate that judgment against what actually happened. Unlike AI memory systems, which are primarily concerned with recalling information, or decision and workflow systems, which primarily record and manage decisions, Judgment Engineering investigates how the reasoning behind consequential decisions can be preserved in a structured form and later evaluated against what actually happened.
 
-### Judgment Engineering and Engineering Judgment
-
-Judgment Engineering should not be confused with **engineering judgment**, although the two concepts are closely related.
-
-**Engineering judgment** is an established concept concerned with how engineers apply knowledge, experience, metacognitive thinking, critical thinking, situational context, evaluation, and decision making when solving problems and making decisions. Recent research has sought to develop a consensus-based definition and methods for teaching and assessing engineering judgment. In a 2025 research brief, Clark, Dickerson, and Toader describe engineering judgment as the application of an engineer's knowledge, experience, metacognitive thinking, and situational context to perform critical thinking, including decision making and evaluation, in support of design or problem solving.
-
-**Judgment Engineering addresses a different problem.** It concerns what happens to consequential human reasoning across its organizational lifecycle: whether it can be captured and preserved, subsequently retrieved and reconstructed, evaluated against outcomes, and used to improve future judgment.
-
-In simple terms:
-
-> **Engineering judgment concerns the exercise of judgment. Judgment Engineering concerns the engineering of its organizational lifecycle.**
-
-The distinction can be expressed simply:
-
-| | Engineering Judgment | Judgment Engineering |
-|---|---|---|
-| **Primary concern** | How judgment is exercised | How judgment is preserved and managed across its lifecycle |
-| **Focus** | The practitioner and the problem | The organization and its decision memory |
-| **Central question** | How should judgment be applied to a problem or decision? | How can an organization preserve and improve the reasoning behind consequential decisions? |
-| **Primary outcome** | Better judgment and decision making | Durable, retrievable, evaluable organizational judgment |
-
-Judgment Engineering does not attempt to redefine engineering judgment. It builds on the broader understanding that judgment involves knowledge, experience, context, critical thinking, decision making, evaluation, assumptions, problem definition, anticipation, feedback, and learning.
-
-Its focus begins with a different organizational question:
-
-> **What happens to judgment after the decision has been made?**
-
-This repository contains both the research framework behind Judgment Engineering and a working prototype used to test the framework in practice.
 
 ### Judgment Engineering and Engineering Judgment
 
@@ -231,7 +202,7 @@ The application reads from and writes directly to Supabase through the Supabase 
 
 All Judgment Units are stored in a single `judgment_units` table.
 
-Retrospective information is stored as additional columns on the existing Judgment Unit rather than as a separate retrospective table or separate record. This keeps the original judgment and its later evaluation connected within the same unit.
+Retrospective information is currently stored as additional columns on the existing Judgment Unit rather than as a separate retrospective table or record. This is the current prototype implementation and remains an area for further architectural development as the research examines how original judgment records and subsequent evaluations should be preserved over time.
 
 ### Environment Variables
 
