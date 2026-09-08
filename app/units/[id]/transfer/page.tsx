@@ -1,5 +1,7 @@
-import { supabase } from "@/lib/supabaseClient";
+﻿import { supabase } from "@/lib/supabaseClient";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import Link from "next/link";
+import TransferForm from "./TransferForm";
 import { notFound, redirect } from "next/navigation";
 
 export default async function TransferPage({
@@ -29,6 +31,32 @@ export default async function TransferPage({
     ? unit.evidence
     : [];
 
+  const supabaseServer = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabaseServer.auth.getUser();
+
+  const { data: unfinishedAttempts } = user
+    ? await supabaseServer
+        .from("transfer_attempts")
+        .select("id, treatment, what_changed, status, created_at")
+        .eq("actor_id", user.id)
+        .eq("source_judgment_unit_id", id)
+        .in("status", ["initiated", "processing"])
+        .order("created_at", { ascending: false })
+    : { data: [] };
+
+  async function signOut() {
+    "use server";
+
+    const supabaseServer = await createSupabaseServerClient();
+
+    await supabaseServer.auth.signOut();
+
+    redirect("/auth");
+  }
+
   async function createTransfer(formData: FormData) {
     "use server";
 
@@ -39,16 +67,99 @@ export default async function TransferPage({
       return;
     }
 
-    const { error } = await supabase
-      .from("judgment_transfers")
-      .insert({
-        source_judgment_unit_id: id,
-        treatment,
-        what_changed: whatChanged || null,
-      });
+    const supabaseServer = await createSupabaseServerClient();
 
-    if (error) {
-      throw new Error(error.message);
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseServer.auth.getUser();
+
+    if (userError || !user) {
+      redirect("/auth");
+    }
+
+    const attemptId = String(formData.get("attempt_id") || "").trim();
+
+    if (!attemptId) {
+      throw new Error("Missing transfer attempt ID.");
+    }
+
+    const { data: existingAttempt, error: existingAttemptError } =
+      await supabaseServer
+        .from("transfer_attempts")
+        .select(
+          "id, actor_id, source_judgment_unit_id, treatment, what_changed, status, result_transfer_id"
+        )
+        .eq("id", attemptId)
+        .eq("actor_id", user.id)
+        .maybeSingle();
+
+    if (existingAttemptError) {
+      throw new Error(existingAttemptError.message);
+    }
+
+    if (!existingAttempt) {
+      const { error: attemptError } = await supabaseServer.rpc(
+        "initiate_transfer_attempt",
+        {
+          target_attempt_id: attemptId,
+          target_judgment_unit_id: id,
+          target_treatment: treatment,
+          target_what_changed: whatChanged,
+        }
+      );
+
+      if (attemptError) {
+        throw new Error(attemptError.message);
+      }
+    } else {
+      const existingWhatChanged = existingAttempt.what_changed || null;
+      const submittedWhatChanged = whatChanged || null;
+
+      if (
+        existingAttempt.source_judgment_unit_id !== id ||
+        existingAttempt.treatment !== treatment ||
+        existingWhatChanged !== submittedWhatChanged
+      ) {
+        throw new Error(
+          "Transfer attempt does not match the original operation."
+        );
+      }
+
+      if (existingAttempt.status === "completed") {
+        redirect(`/units/${id}`);
+      }
+
+      if (
+        existingAttempt.status !== "initiated" &&
+        existingAttempt.status !== "processing"
+      ) {
+        throw new Error(
+          `Transfer attempt cannot be resumed from status: ${existingAttempt.status}`
+        );
+      }
+    }
+
+    const { error: claimError } = await supabaseServer.rpc(
+      "claim_transfer_attempt",
+      {
+        target_attempt_id: attemptId,
+      }
+    );
+
+    if (claimError) {
+      throw new Error(claimError.message);
+    }
+
+    const { error: completeError } = await supabaseServer.rpc(
+      "complete_transfer_attempt",
+      {
+        target_attempt_id: attemptId,
+      }
+    );
+
+    if (completeError) {
+      throw new Error(completeError.message);
     }
 
     redirect(`/units/${id}`);
@@ -56,6 +167,27 @@ export default async function TransferPage({
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-10">
+      {user && (
+        <section className="border rounded-lg p-4 mb-6 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Signed in as
+            </p>
+            <p className="font-semibold mt-1">
+              {user.email}
+            </p>
+          </div>
+
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="border rounded-lg px-4 py-2 text-sm font-semibold hover:bg-gray-50"
+            >
+              Sign out
+            </button>
+          </form>
+        </section>
+      )}
       <Link
         href={`/units/${unit.id}`}
         className="text-sm text-blue-700 hover:underline"
@@ -181,73 +313,71 @@ export default async function TransferPage({
         </div>
       </section>
 
-      <form action={createTransfer}>
+      {unfinishedAttempts && unfinishedAttempts.length > 0 && (
         <section className="border rounded-lg p-5 mt-6">
           <h2 className="text-xl font-semibold">
-            What has changed?
+            Unfinished Transfer Attempts
           </h2>
 
           <p className="text-sm text-gray-600 mt-2">
-            The preserved judgment is historical context. Before applying it,
-            identify what is different about the situation you are facing now.
+            A previous transfer attempt has not reached a final outcome.
+            Resume an existing attempt rather than starting the same operation
+            again.
           </p>
 
-          <textarea
-            name="what_changed"
-            placeholder="What is different now?"
-            className="w-full border rounded p-3 mt-4 min-h-32"
-          />
-        </section>
+          <div className="space-y-3 mt-5">
+            {unfinishedAttempts.map((attempt) => (
+              <form key={attempt.id} action={createTransfer}>
+                <input
+                  type="hidden"
+                  name="attempt_id"
+                  value={attempt.id}
+                />
 
-        <section className="border rounded-lg p-5 mt-6">
-          <h2 className="text-xl font-semibold">
-            Your judgment
-          </h2>
+                <input
+                  type="hidden"
+                  name="treatment"
+                  value={attempt.treatment}
+                />
 
-          <p className="text-sm text-gray-600 mt-2">
-            How should the preserved judgment be treated in the current
-            situation?
-          </p>
+                <input
+                  type="hidden"
+                  name="what_changed"
+                  value={attempt.what_changed || ""}
+                />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
-            <button
-              type="submit"
-              name="treatment"
-              value="apply"
-              className="border rounded-lg p-4 text-left hover:bg-gray-50"
-            >
-              <strong>Apply</strong>
-              <span className="block text-sm text-gray-600 mt-1">
-                The reasoning still applies.
-              </span>
-            </button>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="font-semibold capitalize">
+                        {attempt.treatment}
+                      </p>
 
-            <button
-              type="submit"
-              name="treatment"
-              value="adapt"
-              className="border rounded-lg p-4 text-left hover:bg-gray-50"
-            >
-              <strong>Adapt</strong>
-              <span className="block text-sm text-gray-600 mt-1">
-                The reasoning is useful, but circumstances have changed.
-              </span>
-            </button>
+                      <p className="text-sm text-gray-700 mt-1">
+                        {attempt.what_changed || "No change recorded."}
+                      </p>
 
-            <button
-              type="submit"
-              name="treatment"
-              value="reject"
-              className="border rounded-lg p-4 text-left hover:bg-gray-50"
-            >
-              <strong>Reject</strong>
-              <span className="block text-sm text-gray-600 mt-1">
-                The original reasoning no longer applies.
-              </span>
-            </button>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {attempt.status} -{" "}
+                        {new Date(attempt.created_at).toLocaleString()}
+                      </p>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="border rounded-lg px-4 py-2 text-sm font-semibold hover:bg-gray-50"
+                    >
+                      Resume
+                    </button>
+                  </div>
+                </div>
+              </form>
+            ))}
           </div>
         </section>
-      </form>
+      )}
+
+      <TransferForm action={createTransfer} />
 
       <div className="mt-8 border-t pt-6">
         <p className="text-sm text-gray-500">
@@ -258,3 +388,5 @@ export default async function TransferPage({
     </main>
   );
 }
+
+
