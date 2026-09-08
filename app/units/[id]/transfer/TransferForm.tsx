@@ -1,13 +1,13 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useState } from "react";
 
 type TransferFormProps = {
   action: (formData: FormData) => void | Promise<void>;
 };
 
 export default function TransferForm({ action }: TransferFormProps) {
-  const attemptIdRef = useRef<string | null>(null);
+
   const [submitting, setSubmitting] = useState(false);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -23,18 +23,15 @@ export default function TransferForm({ action }: TransferFormProps) {
       event.preventDefault();
       return;
     }
-
-    if (!attemptIdRef.current) {
-      attemptIdRef.current = crypto.randomUUID();
+    if (!attemptInput.value) {
+      attemptInput.value = crypto.randomUUID();
     }
-
-    attemptInput.value = attemptIdRef.current;
     setSubmitting(true);
   }
 
   return (
     <form action={action} onSubmit={handleSubmit}>
-      <input type="hidden" name="attempt_id" />
+      <input type="hidden" name="attempt_id" defaultValue={crypto.randomUUID()} />
 
       <section className="border rounded-lg p-5 mt-6">
         <h2 className="text-xl font-semibold">
@@ -108,4 +105,7 @@ export default function TransferForm({ action }: TransferFormProps) {
     </form>
   );
 }
+
+
+
 
