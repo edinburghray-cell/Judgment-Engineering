@@ -42,6 +42,97 @@ export default async function ReviewCyclePage({
   const evidence: { label: string }[] =
     reviewCycle.evidence ?? [];
 
+  async function structureJudgment(formData: FormData) {
+    "use server";
+
+    const serverSupabase = await createSupabaseServerClient();
+
+    const {
+      data: { user: currentUser },
+      error: currentUserError,
+    } = await serverSupabase.auth.getUser();
+
+    if (currentUserError || !currentUser) {
+      redirect("/auth");
+    }
+
+    const { error: structureError } = await serverSupabase.rpc(
+      "create_judgment_draft_for_review_cycle",
+      {
+        target_review_cycle_id: reviewCycleId,
+      }
+    );
+
+    if (structureError) {
+      throw new Error(structureError.message);
+    }
+
+    redirect(`/proposals/${reviewCycleId}`);
+  }
+  async function confirmJudgment() {
+    "use server";
+
+    const serverSupabase = await createSupabaseServerClient();
+
+    const {
+      data: { user: currentUser },
+      error: currentUserError,
+    } = await serverSupabase.auth.getUser();
+
+    if (currentUserError || !currentUser) {
+      redirect("/auth");
+    }
+
+    const { error: confirmationError } = await serverSupabase.rpc(
+      "confirm_review_cycle_judgment",
+      {
+        target_review_cycle_id: reviewCycleId,
+      }
+    );
+
+    if (confirmationError) {
+      throw new Error(confirmationError.message);
+    }
+
+    redirect(`/proposals/${reviewCycleId}`);
+  }
+  async function assignReviewer(formData: FormData) {
+    "use server";
+
+    const reviewerActorId = String(
+      formData.get("reviewer_actor_id") ?? ""
+    ).trim();
+
+    if (!reviewerActorId) {
+      throw new Error("Reviewer actor ID is required");
+    }
+
+    const serverSupabase = await createSupabaseServerClient();
+
+    const {
+      data: { user: currentUser },
+      error: currentUserError,
+    } = await serverSupabase.auth.getUser();
+
+    if (currentUserError || !currentUser) {
+      redirect("/auth");
+    }
+
+    const { error: assignmentError } = await serverSupabase.rpc(
+      "assign_review_cycle_reviewer",
+      {
+        target_review_cycle_id: reviewCycleId,
+        target_reviewer_actor_id: reviewerActorId,
+      }
+    );
+
+    if (assignmentError) {
+      throw new Error(assignmentError.message);
+    }
+
+    redirect(`/proposals/${reviewCycleId}`);
+  }
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-10">
       <Link
@@ -160,6 +251,93 @@ export default async function ReviewCyclePage({
           </div>
         </section>
 
+        <section className="border rounded p-5">
+          <h2 className="font-semibold mb-3">Reviewer Assignment</h2>
+
+          {reviewCycle.reviewer_actor_id ? (
+            <p className="text-sm">
+              Assigned reviewer:{" "}
+              <span className="font-mono">
+                {reviewCycle.reviewer_actor_id}
+              </span>
+            </p>
+          ) : reviewCycle.proposer_actor_id === user.id ? (
+            <form action={assignReviewer} className="space-y-3">
+              <label
+                htmlFor="reviewer_actor_id"
+                className="block text-sm font-medium"
+              >
+                Authenticated reviewer actor ID
+              </label>
+
+              <input
+                id="reviewer_actor_id"
+                name="reviewer_actor_id"
+                required
+                className="w-full border rounded px-3 py-2 font-mono text-sm"
+                placeholder="Paste the authenticated reviewer UUID"
+              />
+
+              <p className="text-xs text-gray-500">
+                Only the authenticated proposer can assign the reviewer.
+              </p>
+
+              <button
+                type="submit"
+                className="px-4 py-2 rounded bg-black text-white font-medium"
+              >
+                Assign Reviewer
+              </button>
+            </form>
+          ) : (
+            <p className="text-sm text-gray-600">
+              No reviewer has been assigned yet.
+            </p>
+          )}
+        </section>
+
+        {reviewCycle.review_cycle_status === "reviewable" &&
+        (reviewCycle.proposer_actor_id === user.id ||
+          reviewCycle.reviewer_actor_id === user.id) ? (
+          <section className="border rounded p-5">
+            <h2 className="font-semibold mb-3">Judgment Structuring</h2>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Create the structured Judgment Draft from this reviewable
+              proposal. Structuring does not confirm the Judgment and does
+              not authorize a decision, implementation, or deployment.
+            </p>
+
+            <form action={structureJudgment}>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded bg-black text-white font-medium"
+              >
+                Structure Judgment
+              </button>
+            </form>
+          </section>
+        ) : null}
+        {reviewCycle.review_cycle_status === "structured_unconfirmed" &&
+        reviewCycle.reviewer_actor_id === user.id ? (
+          <section className="border rounded p-5">
+            <h2 className="font-semibold mb-3">Reviewer Confirmation</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Confirm that the structured Judgment accurately represents the
+              reviewed proposal. Confirmation creates the preserved Judgment
+              record but does not create a consequential decision or authorize
+              implementation or deployment.
+            </p>
+            <form action={confirmJudgment}>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded bg-black text-white font-medium"
+              >
+                Confirm Judgment
+              </button>
+            </form>
+          </section>
+        ) : null}
         <section className="border rounded p-5 bg-gray-50">
           <h2 className="font-semibold mb-2">Workflow Boundary</h2>
           <p className="text-sm text-gray-700">
