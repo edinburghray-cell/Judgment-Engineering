@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
@@ -42,6 +42,13 @@ export default async function ReviewCyclePage({
   const evidence: { label: string }[] =
     reviewCycle.evidence ?? [];
 
+  async function signOut() {
+    "use server";
+
+    const serverSupabase = await createSupabaseServerClient();
+    await serverSupabase.auth.signOut();
+    redirect("/auth");
+  }
   async function structureJudgment(formData: FormData) {
     "use server";
 
@@ -133,6 +140,135 @@ export default async function ReviewCyclePage({
     redirect(`/proposals/${reviewCycleId}`);
   }
 
+  async function assignDecisionMaker(formData: FormData) {
+    "use server";
+
+    const decisionMakerActorId = String(
+      formData.get("decision_maker_actor_id") ?? ""
+    ).trim();
+
+    if (!decisionMakerActorId) {
+      throw new Error("Decision-maker actor ID is required");
+    }
+
+    const serverSupabase = await createSupabaseServerClient();
+
+    const {
+      data: { user: currentUser },
+      error: currentUserError,
+    } = await serverSupabase.auth.getUser();
+
+    if (currentUserError || !currentUser) {
+      redirect("/auth");
+    }
+
+    const { error: assignmentError } = await serverSupabase.rpc(
+      "assign_review_cycle_decision_maker",
+      {
+        target_review_cycle_id: reviewCycleId,
+        target_decision_maker_actor_id: decisionMakerActorId,
+      }
+    );
+
+    if (assignmentError) {
+      throw new Error(assignmentError.message);
+    }
+
+    redirect(`/proposals/${reviewCycleId}`);
+  }
+
+  async function recordDecision(formData: FormData) {
+    "use server";
+
+    const decision = String(
+      formData.get("decision") ?? ""
+    ).trim();
+
+    const authorityBasis = String(
+      formData.get("authority_basis") ?? ""
+    ).trim();
+
+    const rationale = String(
+      formData.get("rationale") ?? ""
+    ).trim();
+
+    const residualRisks = String(
+      formData.get("residual_risks") ?? ""
+    ).trim();
+
+    const correlationId = String(
+      formData.get("correlation_id") ?? ""
+    ).trim();
+
+    if (!decision) {
+      throw new Error("Decision is required");
+    }
+
+    if (!authorityBasis) {
+      throw new Error("Authority basis is required");
+    }
+
+    if (!correlationId) {
+      throw new Error("Correlation ID is required");
+    }
+
+    const serverSupabase = await createSupabaseServerClient();
+
+    const {
+      data: { user: currentUser },
+      error: currentUserError,
+    } = await serverSupabase.auth.getUser();
+
+    if (currentUserError || !currentUser) {
+      redirect("/auth");
+    }
+
+    const { error: decisionError } = await serverSupabase.rpc(
+      "record_review_decision",
+      {
+        target_review_cycle_id: reviewCycleId,
+        target_decision: decision,
+        target_authority_basis: authorityBasis,
+        target_rationale: rationale || null,
+        target_residual_risks: residualRisks || null,
+        target_correlation_id: correlationId,
+        target_causation_id: null,
+      }
+    );
+
+    if (decisionError) {
+      throw new Error(decisionError.message);
+    }
+
+    redirect(`/proposals/${reviewCycleId}`);
+  }
+  async function preserveReviewCycle() {
+    "use server";
+
+    const serverSupabase = await createSupabaseServerClient();
+
+    const {
+      data: { user: currentUser },
+      error: currentUserError,
+    } = await serverSupabase.auth.getUser();
+
+    if (currentUserError || !currentUser) {
+      redirect("/auth");
+    }
+
+    const { error: preservationError } = await serverSupabase.rpc(
+      "preserve_review_cycle",
+      {
+        target_review_cycle_id: reviewCycleId,
+      }
+    );
+
+    if (preservationError) {
+      throw new Error(preservationError.message);
+    }
+
+    redirect(`/proposals/${reviewCycleId}`);
+  }
   return (
     <main className="max-w-3xl mx-auto px-4 py-10">
       <Link
@@ -156,6 +292,15 @@ export default async function ReviewCyclePage({
           {reviewCycle.review_cycle_status}
         </span>
       </div>
+
+        <form action={signOut}>
+          <button
+            type="submit"
+            className="text-xs px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            Sign out
+          </button>
+        </form>
 
       <h1 className="text-2xl font-bold mt-4 mb-2">
         Change Proposal
@@ -296,6 +441,51 @@ export default async function ReviewCyclePage({
           )}
         </section>
 
+        <section className="border rounded p-5">
+          <h2 className="font-semibold mb-3">Decision-Maker Assignment</h2>
+
+          {reviewCycle.decision_maker_actor_id ? (
+            <p className="text-sm">
+              Assigned decision-maker:{" "}
+              <span className="font-mono">
+                {reviewCycle.decision_maker_actor_id}
+              </span>
+            </p>
+          ) : reviewCycle.proposer_actor_id === user.id &&
+            reviewCycle.review_cycle_status === "reviewable" ? (
+            <form action={assignDecisionMaker} className="space-y-3">
+              <label
+                htmlFor="decision_maker_actor_id"
+                className="block text-sm font-medium"
+              >
+                Authenticated decision-maker actor ID
+              </label>
+
+              <input
+                id="decision_maker_actor_id"
+                name="decision_maker_actor_id"
+                required
+                className="w-full border rounded px-3 py-2 font-mono text-sm"
+                placeholder="Paste the authenticated decision-maker UUID"
+              />
+
+              <p className="text-xs text-gray-500">
+                Only the authenticated proposer can assign the decision-maker.
+              </p>
+
+              <button
+                type="submit"
+                className="px-4 py-2 rounded bg-black text-white font-medium"
+              >
+                Assign Decision-Maker
+              </button>
+            </form>
+          ) : (
+            <p className="text-sm text-gray-600">
+              No decision-maker has been assigned yet.
+            </p>
+          )}
+        </section>
         {reviewCycle.review_cycle_status === "reviewable" &&
         (reviewCycle.proposer_actor_id === user.id ||
           reviewCycle.reviewer_actor_id === user.id) ? (
@@ -314,6 +504,118 @@ export default async function ReviewCyclePage({
                 className="px-4 py-2 rounded bg-black text-white font-medium"
               >
                 Structure Judgment
+              </button>
+            </form>
+          </section>
+        ) : null}
+        {reviewCycle.review_cycle_status === "human_confirmed" &&
+        reviewCycle.decision_maker_actor_id === user.id ? (
+          <section className="border rounded p-5">
+            <h2 className="font-semibold mb-3">Consequential Decision</h2>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Record the authorized decision for this review cycle. The
+              decision applies only to the reviewed proposal version and scope.
+              It does not authorize implementation, deployment, or expansion.
+            </p>
+
+            <form action={recordDecision} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="decision"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Decision
+                </label>
+                <select
+                  id="decision"
+                  name="decision"
+                  required
+                  className="w-full border rounded px-3 py-2"
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Select decision
+                  </option>
+                  <option value="approve">Approve</option>
+                  <option value="reject">Reject</option>
+                  <option value="defer">Defer</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="authority_basis"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Authority Basis
+                </label>
+                <input
+                  id="authority_basis"
+                  name="authority_basis"
+                  required
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Why you are authorized to make this decision"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="rationale"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Rationale
+                </label>
+                <textarea
+                  id="rationale"
+                  name="rationale"
+                  rows={4}
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Reasoning behind the decision"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="residual_risks"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Residual Risks
+                </label>
+                <textarea
+                  id="residual_risks"
+                  name="residual_risks"
+                  rows={3}
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Risks that remain accepted or unresolved"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="correlation_id"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Correlation ID
+                </label>
+                <input
+                  id="correlation_id"
+                  name="correlation_id"
+                  required
+                  className="w-full border rounded px-3 py-2 font-mono text-sm"
+                  defaultValue={crypto.randomUUID()}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Identifies this decision operation for replay-safe recording
+                  and audit correlation.
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                className="px-4 py-2 rounded bg-black text-white font-medium"
+              >
+                Record Consequential Decision
               </button>
             </form>
           </section>
@@ -338,6 +640,28 @@ export default async function ReviewCyclePage({
             </form>
           </section>
         ) : null}
+        {reviewCycle.review_cycle_status === "decided" &&
+        (reviewCycle.proposer_actor_id === user.id ||
+          reviewCycle.reviewer_actor_id === user.id ||
+          reviewCycle.decision_maker_actor_id === user.id) ? (
+          <section className="border rounded p-5">
+            <h2 className="font-semibold mb-3">Preservation</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Complete the review cycle only after the confirmed Judgment,
+              consequential decision, semantic Judgment event, and workflow
+              audit are all intact. Preservation does not create or change the
+              decision.
+            </p>
+            <form action={preserveReviewCycle}>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded bg-black text-white font-medium"
+              >
+                Preserve / Complete Review Cycle
+              </button>
+            </form>
+          </section>
+        ) : null}
         <section className="border rounded p-5 bg-gray-50">
           <h2 className="font-semibold mb-2">Workflow Boundary</h2>
           <p className="text-sm text-gray-700">
@@ -351,3 +675,6 @@ export default async function ReviewCyclePage({
     </main>
   );
 }
+
+
+
