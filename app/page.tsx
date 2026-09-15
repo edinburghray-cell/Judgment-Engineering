@@ -25,6 +25,13 @@ export default async function Home() {
             Browse Judgment Units
           </Link>
           
+          <Link
+            href="/retrieve"
+            className="border text-sm px-4 py-2 rounded hover:bg-gray-50"
+          >
+            Retrieve Prior Judgment
+          </Link>
+
             <a
             href="https://github.com/edinburghray-cell/Judgment-Engineering"
             target="_blank"

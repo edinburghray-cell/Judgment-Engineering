@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { recordJudgmentRetrospective } from "./retrospectiveAction";
 
 export default function RetrospectiveForm({ id }: { id: string }) {
   const router = useRouter();
@@ -11,6 +11,7 @@ export default function RetrospectiveForm({ id }: { id: string }) {
   const [assumptionsInvalidated, setAssumptionsInvalidated] = useState("");
   const [unexpectedRisks, setUnexpectedRisks] = useState("");
   const [nextTimeChanges, setNextTimeChanges] = useState("");
+  const [futureDecisionGuidance, setFutureDecisionGuidance] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -19,22 +20,21 @@ export default function RetrospectiveForm({ id }: { id: string }) {
     setSaving(true);
     setError("");
 
-    const { error } = await supabase
-      .from("judgment_units")
-      .update({
-        outcome_status: outcomeStatus,
-        assumptions_confirmed: assumptionsConfirmed,
-        assumptions_invalidated: assumptionsInvalidated,
-        unexpected_risks: unexpectedRisks,
-        next_time_changes: nextTimeChanges,
-        retrospective_date: new Date().toISOString().split("T")[0],
-      })
-      .eq("id", id);
+    const formData = new FormData();
+    formData.set("target_judgment_id", id);
+    formData.set("outcome_status", outcomeStatus);
+    formData.set("assumptions_confirmed", assumptionsConfirmed);
+    formData.set("assumptions_invalidated", assumptionsInvalidated);
+    formData.set("unexpected_risks", unexpectedRisks);
+    formData.set("next_time_changes", nextTimeChanges);
+    formData.set("future_decision_guidance", futureDecisionGuidance);
+
+    const result = await recordJudgmentRetrospective(formData);
 
     setSaving(false);
 
-    if (error) {
-      setError(error.message);
+    if (result?.error) {
+      setError(result.error);
       return;
     }
 
@@ -108,6 +108,19 @@ export default function RetrospectiveForm({ id }: { id: string }) {
         />
       </div>
 
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          What should a future, related decision inherit from this?
+        </label>
+        <textarea
+          value={futureDecisionGuidance}
+          onChange={(e) => setFutureDecisionGuidance(e.target.value)}
+          required
+          className="border rounded px-2 py-1 text-sm w-full"
+          rows={3}
+        />
+      </div>
+
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <button
@@ -120,3 +133,6 @@ export default function RetrospectiveForm({ id }: { id: string }) {
     </form>
   );
 }
+
+
+

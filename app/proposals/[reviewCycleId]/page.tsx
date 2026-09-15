@@ -1,6 +1,7 @@
 ﻿import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import RetrospectiveForm from "../../units/[id]/RetrospectiveForm";
 
 type ReviewCyclePageProps = {
   params: Promise<{ reviewCycleId: string }>;
@@ -41,6 +42,27 @@ export default async function ReviewCyclePage({
 
   const evidence: { label: string }[] =
     reviewCycle.evidence ?? [];
+  const { data: committedJudgment } =
+    reviewCycle.confirmed_judgment_id
+      ? await supabase
+          .from("judgments")
+          .select(
+            "id, judgment_unit_id, committing_actor, committed_at, reconsideration_conditions, predecessor_judgment_id"
+          )
+          .eq("id", reviewCycle.confirmed_judgment_id)
+          .maybeSingle()
+      : { data: null };
+
+  const { data: availableJudgments = [] } = await supabase.from("judgments").select("id, judgment_unit_id, title, committed_at").order("committed_at", { ascending: false });
+
+  const { data: judgmentHistory = [] } =
+    committedJudgment
+      ? await supabase
+          .from("judgment_events")
+          .select("id, event_type, created_at, actor, payload")
+          .eq("judgment_id", committedJudgment.id)
+          .order("created_at", { ascending: true })
+      : { data: [] };
 
   async function signOut() {
     "use server";
@@ -76,7 +98,7 @@ export default async function ReviewCyclePage({
 
     redirect(`/proposals/${reviewCycleId}`);
   }
-  async function confirmJudgment() {
+  async function confirmJudgment(formData: FormData) {
     "use server";
 
     const serverSupabase = await createSupabaseServerClient();
@@ -90,10 +112,21 @@ export default async function ReviewCyclePage({
       redirect("/auth");
     }
 
+    const reconsiderationConditions = String(formData.get("reconsideration_conditions") ?? "").trim();
+
+    const predecessorJudgmentIdRaw = String(formData.get("predecessor_judgment_id") ?? "").trim();
+    const predecessorJudgmentId = predecessorJudgmentIdRaw || null;
+
+    if (!reconsiderationConditions) {
+      throw new Error("Reconsideration conditions are required.");
+    }
+
     const { error: confirmationError } = await serverSupabase.rpc(
       "confirm_review_cycle_judgment",
       {
         target_review_cycle_id: reviewCycleId,
+        target_reconsideration_conditions: reconsiderationConditions,
+        target_predecessor_judgment_id: predecessorJudgmentId,
       }
     );
 
@@ -396,6 +429,63 @@ export default async function ReviewCyclePage({
           </div>
         </section>
 
+        {committedJudgment ? (
+          <section className="border rounded p-5">
+            <h2 className="font-semibold mb-3">Judgment Durability</h2>
+
+            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="font-medium text-gray-500">Committed by</dt>
+                <dd className="mt-1 font-mono break-all">
+                  {committedJudgment.committing_actor}
+                </dd>
+              </div>
+
+              <div>
+                <dt className="font-medium text-gray-500">Commit date</dt>
+                <dd className="mt-1">
+                  {new Date(committedJudgment.committed_at).toLocaleString()}
+                </dd>
+              </div>
+
+              <div>
+                <dt className="font-medium text-gray-500">Sources</dt>
+                <dd className="mt-1">
+                  {evidence.length > 0
+                    ? `${evidence.length} recorded source reference${evidence.length === 1 ? "" : "s"}`
+                    : "No source references recorded."}
+                </dd>
+              </div>
+
+              <div>
+                <dt className="font-medium text-gray-500">History</dt>
+                <dd className="mt-1">
+                  {(judgmentHistory ?? []).length} event{(judgmentHistory ?? []).length === 1 ? "" : "s"} recorded
+                </dd>
+              </div>
+
+              <div className="sm:col-span-2">
+                <dt className="font-medium text-gray-500">Retrospective</dt>
+                <dd className="mt-1">
+                  {(judgmentHistory ?? []).some(
+                    (event) => event.event_type === "retrospective"
+                  )
+                    ? "Recorded"
+                    : "Not yet recorded"}
+                </dd>
+              </div>
+
+              <div className="sm:col-span-2">
+                <dt className="font-medium text-gray-500">
+                  Reconsideration condition
+                </dt>
+                <dd className="mt-1 whitespace-pre-wrap">
+                  {committedJudgment.reconsideration_conditions}
+                </dd>
+              </div>
+            </dl>
+          </section>
+        ) : null}
         <section className="border rounded p-5">
           <h2 className="font-semibold mb-3">Reviewer Assignment</h2>
 
@@ -631,6 +721,44 @@ export default async function ReviewCyclePage({
               implementation or deployment.
             </p>
             <form action={confirmJudgment}>
+            <div className="mb-4">
+              <label htmlFor="predecessor_judgment_id" className="block text-sm font-medium mb-2">
+                Prior Judgment (optional)
+              </label>
+              <select
+                id="predecessor_judgment_id"
+                name="predecessor_judgment_id"
+                defaultValue=""
+                className="w-full border rounded p-3 text-sm"
+              >
+                <option value="">None — this is a source Judgment</option>
+                {(availableJudgments ?? []).map((judgment) => (
+                  <option key={judgment.id} value={judgment.id}>
+                    {judgment.judgment_unit_id} — {judgment.title}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-2">
+                Select an existing preserved Judgment only when this Judgment is explicitly related to its prior reasoning.
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="reconsideration_conditions"
+                className="block text-sm font-medium mb-2"
+              >
+                What would make you reconsider this judgment?
+              </label>
+              <textarea
+                id="reconsideration_conditions"
+                name="reconsideration_conditions"
+                required
+                rows={4}
+                className="w-full border rounded p-3 text-sm"
+              />
+            </div>
+
               <button
                 type="submit"
                 className="px-4 py-2 rounded bg-black text-white font-medium"
@@ -662,7 +790,20 @@ export default async function ReviewCyclePage({
             </form>
           </section>
         ) : null}
-        <section className="border rounded p-5 bg-gray-50">
+        {reviewCycle.review_cycle_status === "preserved_complete" &&
+        reviewCycle.confirmed_judgment_id &&
+        (reviewCycle.proposer_actor_id === user.id ||
+          reviewCycle.reviewer_actor_id === user.id ||
+          reviewCycle.decision_maker_actor_id === user.id) ? (
+          <section className="border rounded p-5">
+            <h2 className="font-semibold mb-3">Retrospective</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Record what was learned from the preserved Judgment without
+              modifying the original Judgment.
+            </p>
+            <RetrospectiveForm id={reviewCycle.confirmed_judgment_id} />
+          </section>
+        ) : null}        <section className="border rounded p-5 bg-gray-50">
           <h2 className="font-semibold mb-2">Workflow Boundary</h2>
           <p className="text-sm text-gray-700">
             This page represents a reviewable proposal. A consequential
@@ -675,6 +816,18 @@ export default async function ReviewCyclePage({
     </main>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
