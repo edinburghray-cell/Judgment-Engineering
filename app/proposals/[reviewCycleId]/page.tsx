@@ -1,7 +1,8 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import RetrospectiveForm from "../../units/[id]/RetrospectiveForm";
+import ConfirmationForm from "./ConfirmationForm";
 
 type ReviewCyclePageProps = {
   params: Promise<{ reviewCycleId: string }>;
@@ -117,8 +118,26 @@ export default async function ReviewCyclePage({
     const predecessorJudgmentIdRaw = String(formData.get("predecessor_judgment_id") ?? "").trim();
     const predecessorJudgmentId = predecessorJudgmentIdRaw || null;
 
+    const isSupersession = String(formData.get("is_supersession") ?? "") === "true";
+
+    const supersessionRationale = String(formData.get("supersession_rationale") ?? "").trim();
+
+    const validationBasis = String(formData.get("validation_basis") ?? "").trim();
+
     if (!reconsiderationConditions) {
       throw new Error("Reconsideration conditions are required.");
+    }
+
+    if (isSupersession && !predecessorJudgmentId) {
+      throw new Error("Supersession requires a prior Judgment.");
+    }
+
+    if (isSupersession && !supersessionRationale) {
+      throw new Error("Supersession rationale is required.");
+    }
+
+    if (isSupersession && !validationBasis) {
+      throw new Error("Validation basis is required.");
     }
 
     const { error: confirmationError } = await serverSupabase.rpc(
@@ -127,6 +146,9 @@ export default async function ReviewCyclePage({
         target_review_cycle_id: reviewCycleId,
         target_reconsideration_conditions: reconsiderationConditions,
         target_predecessor_judgment_id: predecessorJudgmentId,
+        target_is_supersession: isSupersession,
+        target_supersession_rationale: isSupersession ? supersessionRationale : null,
+        target_validation_basis: isSupersession ? validationBasis : null,
       }
     );
 
@@ -720,52 +742,10 @@ export default async function ReviewCyclePage({
               record but does not create a consequential decision or authorize
               implementation or deployment.
             </p>
-            <form action={confirmJudgment}>
-            <div className="mb-4">
-              <label htmlFor="predecessor_judgment_id" className="block text-sm font-medium mb-2">
-                Prior Judgment (optional)
-              </label>
-              <select
-                id="predecessor_judgment_id"
-                name="predecessor_judgment_id"
-                defaultValue=""
-                className="w-full border rounded p-3 text-sm"
-              >
-                <option value="">None — this is a source Judgment</option>
-                {(availableJudgments ?? []).map((judgment) => (
-                  <option key={judgment.id} value={judgment.id}>
-                    {judgment.judgment_unit_id} — {judgment.title}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-2">
-                Select an existing preserved Judgment only when this Judgment is explicitly related to its prior reasoning.
-              </p>
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="reconsideration_conditions"
-                className="block text-sm font-medium mb-2"
-              >
-                What would make you reconsider this judgment?
-              </label>
-              <textarea
-                id="reconsideration_conditions"
-                name="reconsideration_conditions"
-                required
-                rows={4}
-                className="w-full border rounded p-3 text-sm"
-              />
-            </div>
-
-              <button
-                type="submit"
-                className="px-4 py-2 rounded bg-black text-white font-medium"
-              >
-                Confirm Judgment
-              </button>
-            </form>
+            <ConfirmationForm
+              action={confirmJudgment}
+              availableJudgments={availableJudgments ?? []}
+            />
           </section>
         ) : null}
         {reviewCycle.review_cycle_status === "decided" &&
@@ -816,18 +796,3 @@ export default async function ReviewCyclePage({
     </main>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
