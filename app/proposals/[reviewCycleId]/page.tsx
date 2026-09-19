@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import RetrospectiveForm from "../../units/[id]/RetrospectiveForm";
 import ConfirmationForm from "./ConfirmationForm";
+import JudgmentDraftReviewForm from "./JudgmentDraftReviewForm";
 
 type ReviewCyclePageProps = {
   params: Promise<{ reviewCycleId: string }>;
@@ -38,6 +39,20 @@ export default async function ReviewCyclePage({
     return notFound();
   }
 
+  const { data: judgmentDraftData, error: judgmentDraftError } =
+    reviewCycle.review_cycle_status === "structured_unconfirmed"
+      ? await supabase.rpc("get_judgment_draft_for_review_cycle", {
+          target_review_cycle_id: reviewCycleId,
+        })
+      : { data: null, error: null };
+
+  if (judgmentDraftError) {
+    throw new Error(judgmentDraftError.message);
+  }
+
+  const judgmentDraft = Array.isArray(judgmentDraftData)
+    ? judgmentDraftData[0]
+    : judgmentDraftData;
   const alternatives: { label: string }[] =
     reviewCycle.alternatives ?? [];
 
@@ -95,6 +110,79 @@ export default async function ReviewCyclePage({
 
     if (structureError) {
       throw new Error(structureError.message);
+    }
+
+    redirect(`/proposals/${reviewCycleId}`);
+  }
+  async function updateJudgmentDraft(formData: FormData) {
+    "use server";
+
+    const serverSupabase = await createSupabaseServerClient();
+
+    const {
+      data: { user: currentUser },
+      error: currentUserError,
+    } = await serverSupabase.auth.getUser();
+
+    if (currentUserError || !currentUser) {
+      redirect("/auth");
+    }
+
+    const {
+      data: currentDraftData,
+      error: currentDraftError,
+    } = await serverSupabase.rpc("get_judgment_draft_for_review_cycle", {
+      target_review_cycle_id: reviewCycleId,
+    });
+
+    if (currentDraftError) {
+      throw new Error(currentDraftError.message);
+    }
+
+    const currentDraft = Array.isArray(currentDraftData)
+      ? currentDraftData[0]
+      : currentDraftData;
+
+    if (!currentDraft?.id) {
+      throw new Error("Judgment Draft is not available for correction.");
+    }
+
+    const field = String(formData.get("field") ?? "").trim();
+    const correctedValueRaw = String(
+      formData.get("corrected_value") ?? ""
+    );
+    const correctionReason = String(
+      formData.get("correction_reason") ?? ""
+    ).trim();
+
+    if (!field) {
+      throw new Error("Correction field is required.");
+    }
+
+    if (!correctionReason) {
+      throw new Error("Correction reason is required.");
+    }
+
+    let correctedValue: unknown;
+
+    try {
+      correctedValue = JSON.parse(correctedValueRaw);
+    } catch {
+      throw new Error("Corrected value must be valid JSON.");
+    }
+
+    const { error: correctionError } = await serverSupabase.rpc(
+      "update_judgment_draft_with_revision",
+      {
+        target_judgment_draft_id: currentDraft.id,
+        target_field: field,
+        target_corrected_value: correctedValue,
+        target_correction_reason: correctionReason,
+      }
+    );
+
+    if (correctionError) {
+      throw new Error(correctionError.message);
     }
 
     redirect(`/proposals/${reviewCycleId}`);
@@ -734,19 +822,44 @@ export default async function ReviewCyclePage({
         ) : null}
         {reviewCycle.review_cycle_status === "structured_unconfirmed" &&
         reviewCycle.reviewer_actor_id === user.id ? (
-          <section className="border rounded p-5">
-            <h2 className="font-semibold mb-3">Reviewer Confirmation</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Confirm that the structured Judgment accurately represents the
-              reviewed proposal. Confirmation creates the preserved Judgment
-              record but does not create a consequential decision or authorize
-              implementation or deployment.
-            </p>
-            <ConfirmationForm
-              action={confirmJudgment}
-              availableJudgments={availableJudgments ?? []}
-            />
-          </section>
+          <>
+            <section className="border rounded p-5">
+              <h2 className="font-semibold mb-3">
+                Judgment Draft Review
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Review and correct the structured Judgment Draft before
+                confirmation. Each correction is preserved as human review
+                evidence. Correction does not confirm the Judgment.
+              </p>
+
+              {judgmentDraft ? (
+                <JudgmentDraftReviewForm
+                  draft={judgmentDraft}
+                  action={updateJudgmentDraft}
+                />
+              ) : (
+                <p className="text-sm text-red-600">
+                  Judgment Draft could not be loaded.
+                </p>
+              )}
+            </section>
+
+            <section className="border rounded p-5">
+              <h2 className="font-semibold mb-3">Reviewer Confirmation</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Confirm that the structured Judgment accurately represents
+                the reviewed proposal and any corrections made above.
+                Confirmation creates the preserved Judgment record but does
+                not create a consequential decision or authorize
+                implementation or deployment.
+              </p>
+              <ConfirmationForm
+                action={confirmJudgment}
+                availableJudgments={availableJudgments ?? []}
+              />
+            </section>
+          </>
         ) : null}
         {reviewCycle.review_cycle_status === "decided" &&
         (reviewCycle.proposer_actor_id === user.id ||
