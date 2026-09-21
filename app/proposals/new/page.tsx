@@ -87,6 +87,7 @@ export default async function NewProposalPage({
     const scope = String(formData.get("scope") || "").trim();
     const affectedSystem = String(formData.get("affected_system") || "").trim();
     const environment = String(formData.get("environment") || "").trim();
+    const decisionClass = String(formData.get("decision_class") || "").trim();
     const assumptions = String(formData.get("assumptions") || "").trim();
     const alternativesRaw = String(formData.get("alternatives") || "").trim();
     const evidenceRaw = String(formData.get("evidence") || "").trim();
@@ -121,6 +122,7 @@ export default async function NewProposalPage({
       target_scope: scope,
       target_affected_system: affectedSystem,
       target_environment: environment,
+      target_decision_class: decisionClass,
       target_assumptions: assumptions,
       target_alternatives: alternatives,
       target_evidence: evidence,
@@ -292,6 +294,17 @@ export default async function NewProposalPage({
             placeholder="Environment (for example: staging)"
             className="w-full border rounded p-3"
           />
+
+          <select
+            name="decision_class"
+            required
+            defaultValue="ai_system_change_approval"
+            className="w-full border rounded p-3"
+          >
+            <option value="ai_system_change_approval">
+              AI-system change approval
+            </option>
+          </select>
         </fieldset>
 
         <fieldset className="space-y-3">
