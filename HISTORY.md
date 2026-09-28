@@ -44,3 +44,15 @@ The Judgment Unit stopped being a concept described in a white paper and became 
 - Public deployment via Vercel
 - Landing page and public-facing README
 - Short demo video
+### September 28, 2026 — End-to-End Judgment-to-Execution Boundary Verification
+- Verified the complete provenance chain from a confirmed Judgment through its Review Cycle, approved Decision, Execution Authority, Execution, and persisted Execution Evidence
+- Canonical Judgment: `3078b005-c028-4144-b686-7965ab03ee3a`
+- Review Cycle: `3fa405fe-56fe-48c0-818c-0195be0881d6`
+- Approved Decision: `f435e356-f3a0-4890-8f8f-2f62f28f5f6b`
+- Execution Authority: `bf9d0beb-94be-4722-8a89-d9c56b355247`
+- Verified successful execution under the authorized action `test_execution` and scope `Y4 execution evidence verification only`
+- Persisted Execution Evidence: `7b4e083c-3fcb-46ec-a603-302ff5720aab`
+- Correlation ID preserved across the Decision, Execution Authority, and Execution Evidence: `c98b5e8d-1f9b-46ff-a4d2-c359fcd8945d`
+- Attempted execution outside the authorized scope was rejected with `Execution scope exceeds authority`
+- Confirmed that the rejected broader-scope attempt produced zero Execution Evidence
+- Y1 through Y5 verification is complete; Y6 closure evidence is now being recorded
