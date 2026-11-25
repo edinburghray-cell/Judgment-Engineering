@@ -1,7 +1,9 @@
-import type { NextConfig } from "next";
+﻿import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  turbopack: {
+    root: "C:/Users/USER/judgment-engine",
+  },
 };
 
 export default nextConfig;

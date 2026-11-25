@@ -1,4 +1,4 @@
-﻿-- Milestone X10-A: allow the trusted JE server path to retrieve
+-- Milestone X10-A: allow the trusted JE server path to retrieve
 -- contextual Judgments on behalf of a configured JE actor.
 --
 -- Browser callers continue to use auth.uid().
@@ -55,7 +55,7 @@ declare
 begin
   if authenticated_actor is not null then
     current_actor := authenticated_actor;
-  elsif current_setting('request.jwt.claim.role', true) = 'service_role'
+  elsif auth.role() = 'service_role'
         and target_actor_id is not null then
     current_actor := target_actor_id;
   else
