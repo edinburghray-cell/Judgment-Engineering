@@ -77,19 +77,21 @@ export default async function JudgmentPage({
         .maybeSingle()
     : { data: null };
 
-  const { data: successors = [] } = await supabase
+  const { data: successorData } = await supabase
     .from("judgments")
     .select("id, judgment_unit_id, title")
     .eq("predecessor_judgment_id", judgment.id)
     .order("committed_at", { ascending: true })
     .limit(2);
+  const successors = successorData ?? [];
   const successor = successors[0] ?? null;
 
-  const { data: laterEvidence = [] } = await supabase
+  const { data: laterEvidenceData } = await supabase
     .from("judgment_evidence")
     .select("id, description, evidence_category, entered_at, judgment_event_id")
     .eq("judgment_id", judgment.id)
     .order("entered_at", { ascending: true });
+  const laterEvidence = laterEvidenceData ?? [];
   const eventIds = (history ?? []).map((event) => event.id);
   const { data: eventEvidence = [] } = eventIds.length
     ? await supabase
