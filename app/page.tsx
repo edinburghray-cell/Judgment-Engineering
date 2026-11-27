@@ -1,11 +1,6 @@
-﻿import { supabase } from "@/lib/supabaseClient";
-import Link from "next/link";
+﻿import Link from "next/link";
 
-export default async function Home() {
-  const { data: units } = await supabase
-    .from("judgment_units")
-    .select("judgment_unit_id, title, department, status, outcome_status")
-    .order("seq_num", { ascending: true });
+export default function Home() {
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-16 space-y-16">
@@ -98,33 +93,6 @@ export default async function Home() {
         </div>
       </section>
 
-      <section>
-        <h2 className="text-xl font-semibold mb-4">
-          Five Canonical Judgment Units
-        </h2>
-        <div className="space-y-3">
-          {units?.map((u) => (
-            <Link
-              key={u.judgment_unit_id}
-              href={`/units`}
-              className="block border rounded p-4 hover:bg-gray-50"
-            >
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-mono text-gray-400">
-                  {u.judgment_unit_id}
-                </span>
-                <span className="text-xs px-2 py-1 rounded bg-gray-100">
-                  {u.outcome_status
-                    ? `Retrospective: ${u.outcome_status}`
-                    : u.status}
-                </span>
-              </div>
-              <p className="font-medium mt-1">{u.title}</p>
-              <p className="text-xs text-gray-500">{u.department}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
 
       <section className="border-t pt-8">
         <p className="text-sm text-gray-600">
@@ -148,4 +116,7 @@ export default async function Home() {
     </main>
   );
 }
+
+
+
 

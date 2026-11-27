@@ -1,7 +1,15 @@
-﻿import { supabase } from "@/lib/supabaseClient";
+import { redirect } from "next/navigation";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import RetrospectiveForm from "./RetrospectiveForm";
+
+type JudgmentTransfer = {
+  id: string;
+  treatment: string;
+  what_changed: string | null;
+  created_at: string;
+};
 
 export default async function UnitDetailPage({
   params,
@@ -9,6 +17,9 @@ export default async function UnitDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const supabase = await createSupabaseServerClient();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) redirect("/auth");
   const { data: unit, error } = await supabase
     .from("judgment_units")
     .select("*")
@@ -169,7 +180,7 @@ const { data: transfers } = await supabase
 
     {transfers && transfers.length > 0 ? (
       <div className="space-y-3">
-        {transfers.map((transfer: any) => (
+        {transfers.map((transfer: JudgmentTransfer) => (
           <div key={transfer.id} className="border rounded-lg p-4">
             <p className="font-semibold capitalize">
               {transfer.treatment}

@@ -44,6 +44,28 @@ export default function ConfirmationForm({
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
         <label
+          htmlFor="authority_context"
+          className="block text-sm font-medium mb-2"
+        >
+          Authority Context at Commitment
+        </label>
+        <textarea
+          id="authority_context"
+          name="authority_context"
+          required
+          minLength={8}
+          rows={3}
+          disabled={submitting}
+          className="w-full border rounded p-3 text-sm"
+          placeholder="State the organizational basis that gives you standing to commit this Judgment now."
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          This context is sealed with the Judgment and cannot be added later.
+        </p>
+      </div>
+
+      <div className="mb-4">
+        <label
           htmlFor="predecessor_judgment_id"
           className="block text-sm font-medium mb-2"
         >

@@ -1,6 +1,10 @@
+import { requireShowcaseTestRoutes } from "@/lib/testRouteAccess";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
+export const dynamic = "force-dynamic";
+
 export default async function Y4AuthorityTestPage() {
+  requireShowcaseTestRoutes();
   const supabase = await createSupabaseServerClient();
 
   const {

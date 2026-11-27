@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabaseClient';
+import { redirect } from 'next/navigation';
+import { createSupabaseServerClient } from '@/lib/supabaseServer';
 import Link from 'next/link';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -14,6 +15,9 @@ export default async function UnitsPage({
   searchParams: Promise<{ department?: string; owner?: string; keyword?: string }>;
 }) {
   const { department, owner, keyword } = await searchParams;
+  const supabase = await createSupabaseServerClient();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) redirect('/auth');
   let query = supabase
     .from('judgment_units')
     .select(

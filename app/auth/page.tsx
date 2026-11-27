@@ -1,91 +1,14 @@
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import PasswordField from "./PasswordField";
+import RecoverySection from "./RecoverySection";
 
-export default async function AuthPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
-  const params = await searchParams;
-
-  async function signIn(formData: FormData) {
-    "use server";
-
-    const email = String(formData.get("email") || "").trim();
-    const password = String(formData.get("password") || "");
-
-    if (!email || !password) {
-      redirect("/auth?error=Email%20and%20password%20are%20required");
-    }
-
-    const supabase = await createSupabaseServerClient();
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      redirect(`/auth?error=${encodeURIComponent(error.message)}`);
-    }
-
-    redirect("/units");
-  }
-
-  return (
-    <main className="max-w-md mx-auto px-4 py-16">
-      <section className="border rounded-lg p-6">
-        <p className="text-sm font-medium text-gray-500">
-          JUDGMENT ENGINEERING
-        </p>
-
-        <h1 className="text-2xl font-bold mt-2">
-          Sign in
-        </h1>
-
-        <p className="text-sm text-gray-600 mt-2">
-          Sign in to perform authorized judgment transfers.
-        </p>
-
-        {params.error && (
-          <p className="text-sm text-red-700 mt-4">
-            {params.error}
-          </p>
-        )}
-
-        <form action={signIn} className="mt-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium">
-              Email
-            </label>
-            <input
-              name="email"
-              type="email"
-              required
-              className="w-full border rounded p-3 mt-1"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">
-              Password
-            </label>
-            <input
-              name="password"
-              type="password"
-              required
-              className="w-full border rounded p-3 mt-1"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-black text-white rounded p-3"
-          >
-            Sign in
-          </button>
-        </form>
-      </section>
-    </main>
-  );
+export default async function AuthPage({ searchParams }: { searchParams: Promise<{ error?: string; message?: string; mode?: string; confirmed?: string }> }) {
+ const params = await searchParams;
+ const registering = params.mode === "signup";
+ async function signIn(formData: FormData) { "use server"; const email=String(formData.get("email")||"").trim(); const password=String(formData.get("password")||""); if(!email||!password) redirect("/auth?error=Email%20and%20password%20are%20required"); const supabase=await createSupabaseServerClient(); const {error}=await supabase.auth.signInWithPassword({email,password}); if(error) redirect(`/auth?error=${encodeURIComponent(error.message)}`); redirect("/units"); }
+ async function signUp(formData: FormData) { "use server"; const email=String(formData.get("email")||"").trim(); const password=String(formData.get("password")||""); if(!email||!password) redirect("/auth?mode=signup&error=Email%20and%20password%20are%20required"); if(password.length<8) redirect("/auth?mode=signup&error=Password%20must%20be%20at%20least%208%20characters"); const h=await headers(); const host=h.get("x-forwarded-host")||h.get("host"); const protocol=h.get("x-forwarded-proto")||"https"; if(!host) redirect("/auth?mode=signup&error=Unable%20to%20start%20registration"); const supabase=await createSupabaseServerClient(); const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:`${protocol}://${host}/auth/callback?next=%2Fauth%3Fconfirmed%3D1`}}); if(error) redirect(`/auth?mode=signup&error=${encodeURIComponent(error.message)}`); if(data.session) await supabase.auth.signOut(); redirect(data.session?"/auth?message=Your%20account%20is%20ready.%20Sign%20in%20to%20continue.%20Organisation%20records%20remain%20restricted%20until%20an%20administrator%20grants%20you%20access.":"/auth?message=Account%20created.%20Check%20your%20email%20and%20verify%20your%20address%20before%20signing%20in.%20Organisation%20records%20remain%20restricted%20until%20an%20administrator%20grants%20you%20access."); }
+ async function requestRecovery(formData: FormData) { "use server"; const email=String(formData.get("email")||"").trim(); if(!email) redirect("/auth?error=Enter%20your%20email"); const h=await headers(); const host=h.get("x-forwarded-host")||h.get("host"); const protocol=h.get("x-forwarded-proto")||"https"; if(!host) redirect("/auth?error=Unable%20to%20start%20recovery"); const supabase=await createSupabaseServerClient(); const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:`${protocol}://${host}/auth/callback?next=%2Fauth%2Freset-password`}); if(error) redirect("/auth?error=Unable%20to%20send%20recovery%20email.%20Please%20try%20again"); redirect("/auth?message=If%20that%20address%20is%20registered%2C%20a%20recovery%20email%20has%20been%20sent"); }
+ return <main className="max-w-md mx-auto px-4 py-16"><section className="border rounded-lg p-6"><p className="text-sm font-medium text-gray-500">JUDGMENT ENGINEERING</p><h1 className="text-2xl font-bold mt-2">{registering?"Create account":"Sign in"}</h1><p className="text-sm text-gray-600 mt-2">Access your organization&apos;s judgment memory. Capture, preserve and retrieve the reasoning behind important decisions.</p><nav aria-label="Account" className="grid grid-cols-2 mt-5 border-b"><a href="/auth" aria-current={!registering?"page":undefined} className={`text-center p-2 text-sm ${!registering?"border-b-2 border-black font-semibold":"text-gray-600"}`}>Sign in</a><a href="/auth?mode=signup" aria-current={registering?"page":undefined} className={`text-center p-2 text-sm ${registering?"border-b-2 border-black font-semibold":"text-gray-600"}`}>Create account</a></nav>{params.error&&<p role="alert" className="text-sm text-red-700 mt-4">{params.error}</p>}{params.message&&<p role="status" className="text-sm text-green-700 mt-4">{params.message}</p>}{params.confirmed&&<p role="status" className="text-sm text-green-700 mt-4">Email verified. You can now sign in.</p>}<form action={registering?signUp:signIn} className="mt-6 space-y-4"><label className="block text-sm font-medium">Email<input name="email" type="email" required autoComplete="email" className="w-full border rounded p-3 mt-1" /></label><label className="block text-sm font-medium">Password<PasswordField name="password" /></label>{registering&&<p className="text-xs text-gray-600">Use at least 8 characters. Your password is sent directly to Supabase Auth.</p>}<button className="w-full bg-black text-white rounded p-3">{registering?"Create account":"Sign in"}</button></form>{!registering&&<RecoverySection action={requestRecovery} />}</section></main>;
 }

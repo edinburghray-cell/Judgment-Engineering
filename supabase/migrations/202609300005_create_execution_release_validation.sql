@@ -39,11 +39,18 @@ security definer
 set search_path = public, pg_temp
 as $$
 declare
+  current_actor uuid;
   operation_record record;
-  authority_record record;
+  authority_record public.execution_authorities%rowtype;
   rejection text;
   new_attempt_id uuid;
 begin
+  current_actor := auth.uid();
+
+  if current_actor is null then
+    raise exception 'Authentication required';
+  end if;
+
   if target_operation_id is null then
     raise exception 'Execution operation identity is required';
   end if;
@@ -68,6 +75,10 @@ begin
 
   if not found then
     raise exception 'Execution operation not found';
+  end if;
+
+  if operation_record.actor_id <> current_actor then
+    raise exception 'Only the operation actor can validate execution release';
   end if;
 
   /*

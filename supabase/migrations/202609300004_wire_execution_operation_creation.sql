@@ -15,6 +15,15 @@ alter function public.authorize_execution(
 )
 rename to authorize_execution_z5;
 
+revoke execute on function public.authorize_execution_z5(
+  uuid,
+  text,
+  text,
+  uuid,
+  text,
+  jsonb
+) from public, anon, authenticated;
+
 
 create or replace function public.authorize_execution(
   target_authority_id uuid,
@@ -152,6 +161,15 @@ end;
 $$;
 
 
+revoke execute on function public.authorize_execution(
+  uuid,
+  text,
+  text,
+  uuid,
+  text,
+  jsonb
+) from public, anon;
+
 grant execute on function public.authorize_execution(
   uuid,
   text,
@@ -160,15 +178,6 @@ grant execute on function public.authorize_execution(
   text,
   jsonb
 ) to authenticated;
-
-revoke execute on function public.authorize_execution(
-  uuid,
-  text,
-  text,
-  uuid,
-  text,
-  jsonb
-) from anon;
 
 alter function public.authorize_execution(
   uuid,

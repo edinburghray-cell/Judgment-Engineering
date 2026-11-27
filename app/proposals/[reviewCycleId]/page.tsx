@@ -79,15 +79,7 @@ export default async function ReviewCyclePage({
           .eq("judgment_id", committedJudgment.id)
           .order("created_at", { ascending: true })
       : { data: [] };
-
-  async function signOut() {
-    "use server";
-
-    const serverSupabase = await createSupabaseServerClient();
-    await serverSupabase.auth.signOut();
-    redirect("/auth");
-  }
-  async function structureJudgment(formData: FormData) {
+async function structureJudgment() {
     "use server";
 
     const serverSupabase = await createSupabaseServerClient();
@@ -202,6 +194,7 @@ export default async function ReviewCyclePage({
     }
 
     const reconsiderationConditions = String(formData.get("reconsideration_conditions") ?? "").trim();
+    const authorityContext = String(formData.get("authority_context") ?? "").trim();
 
     const predecessorJudgmentIdRaw = String(formData.get("predecessor_judgment_id") ?? "").trim();
     const predecessorJudgmentId = predecessorJudgmentIdRaw || null;
@@ -214,6 +207,9 @@ export default async function ReviewCyclePage({
 
     if (!reconsiderationConditions) {
       throw new Error("Reconsideration conditions are required.");
+    }
+    if (authorityContext.length < 8) {
+      throw new Error("Authority Context at commitment is required.");
     }
 
     if (isSupersession && !predecessorJudgmentId) {
@@ -237,6 +233,7 @@ export default async function ReviewCyclePage({
         target_is_supersession: isSupersession,
         target_supersession_rationale: isSupersession ? supersessionRationale : null,
         target_validation_basis: isSupersession ? validationBasis : null,
+        target_authority_context: authorityContext,
       }
     );
 
@@ -435,17 +432,7 @@ export default async function ReviewCyclePage({
           {reviewCycle.review_cycle_status}
         </span>
       </div>
-
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="text-xs px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
-          >
-            Sign out
-          </button>
-        </form>
-
-      <h1 className="text-2xl font-bold mt-4 mb-2">
+<h1 className="text-2xl font-bold mt-4 mb-2">
         Change Proposal
       </h1>
 

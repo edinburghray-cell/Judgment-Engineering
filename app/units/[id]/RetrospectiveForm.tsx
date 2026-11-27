@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -86,7 +86,7 @@ export default function RetrospectiveForm({ id }: { id: string }) {
 
       <div>
         <label className="block text-sm font-medium mb-1">
-          Unexpected risks (what materialized that wasn't foreseen)
+          Unexpected risks (what materialized that wasn&apos;t foreseen)
         </label>
         <textarea
           value={unexpectedRisks}

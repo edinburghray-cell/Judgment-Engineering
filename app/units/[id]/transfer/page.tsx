@@ -1,4 +1,3 @@
-﻿import { supabase } from "@/lib/supabaseClient";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import Link from "next/link";
 import TransferForm from "./TransferForm";
@@ -11,7 +10,17 @@ export default async function TransferPage({
 }) {
   const { id } = await params;
 
-  const { data: unit, error } = await supabase
+  const supabaseServer = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabaseServer.auth.getUser();
+
+  if (!user) {
+    redirect("/auth");
+  }
+
+  const { data: unit, error } = await supabaseServer
     .from("judgment_units")
     .select("*")
     .eq("id", id)
@@ -31,31 +40,14 @@ export default async function TransferPage({
     ? unit.evidence
     : [];
 
-  const supabaseServer = await createSupabaseServerClient();
+  const { data: unfinishedAttempts } = await supabaseServer
+    .from("transfer_attempts")
+    .select("id, treatment, what_changed, status, created_at")
+    .eq("actor_id", user.id)
+    .eq("source_judgment_unit_id", id)
+    .in("status", ["initiated", "processing"])
+    .order("created_at", { ascending: false });
 
-  const {
-    data: { user },
-  } = await supabaseServer.auth.getUser();
-
-  const { data: unfinishedAttempts } = user
-    ? await supabaseServer
-        .from("transfer_attempts")
-        .select("id, treatment, what_changed, status, created_at")
-        .eq("actor_id", user.id)
-        .eq("source_judgment_unit_id", id)
-        .in("status", ["initiated", "processing"])
-        .order("created_at", { ascending: false })
-    : { data: [] };
-
-  async function signOut() {
-    "use server";
-
-    const supabaseServer = await createSupabaseServerClient();
-
-    await supabaseServer.auth.signOut();
-
-    redirect("/auth");
-  }
 
   async function createTransfer(formData: FormData) {
     "use server";
@@ -177,15 +169,6 @@ export default async function TransferPage({
               {user.email}
             </p>
           </div>
-
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="border rounded-lg px-4 py-2 text-sm font-semibold hover:bg-gray-50"
-            >
-              Sign out
-            </button>
-          </form>
         </section>
       )}
       <Link
@@ -262,7 +245,7 @@ export default async function TransferPage({
               </h3>
 
               <ul className="list-disc list-inside text-gray-700 mt-1">
-                {options.map((option: any, index: number) => (
+                {options.map((option: string | { label?: string; reason_rejected?: string }, index: number) => (
                   <li key={index}>
                     {typeof option === "string"
                       ? option
@@ -280,7 +263,7 @@ export default async function TransferPage({
               </h3>
 
               <ul className="list-disc list-inside text-gray-700 mt-1">
-                {rejected.map((option: any, index: number) => (
+                {rejected.map((option: string | { label?: string; reason_rejected?: string }, index: number) => (
                   <li key={index}>
                     {typeof option === "string"
                       ? option
@@ -300,7 +283,7 @@ export default async function TransferPage({
               </h3>
 
               <ul className="list-disc list-inside text-gray-700 mt-1">
-                {evidence.map((item: any, index: number) => (
+                {evidence.map((item: string | { label?: string; reason_rejected?: string }, index: number) => (
                   <li key={index}>
                     {typeof item === "string"
                       ? item

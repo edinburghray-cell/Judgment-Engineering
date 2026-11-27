@@ -1,0 +1,35 @@
+project_id = "judgment-engine-local"
+
+[api]
+enabled = true
+port = 55431
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 55432
+shadow_port = 55430
+
+[studio]
+enabled = true
+port = 55433
+
+[inbucket]
+enabled = true
+port = 55434
+
+[analytics]
+enabled = true
+port = 55437
+backend = "postgres"
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000"]
+enable_signup = true
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
